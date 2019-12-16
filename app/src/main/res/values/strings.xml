@@ -1,0 +1,85 @@
+<resources>
+
+    <!--  Meta  -->
+    <string name="app_name">Sym</string>
+
+    <!--  Login -->
+    <string name="lbl_sign_in">Sign In</string>
+
+    <!--  Login Providers  -->
+    <string name="lbl_apple">Apple</string>
+    <string name="lbl_microsoft">Microsoft</string>
+    <string name="lbl_twitter">Twitter</string>
+    <string name="lbl_facebook">Facebook</string>
+    <string name="lbl_google">Google</string>
+
+    <!--  Main  -->
+    <string name="lbl_topic">Topic:</string>
+    <string name="lbl_message">Message</string>
+
+    <!--  Menu  -->
+    <string name="lbl_settings">Settings</string>
+    <string name="lbl_show_pins">Show Pins</string>
+    <string name="lbl_about">About</string>
+
+    <!--  Preferences Titles -->
+    <string name="lbl_log_out">Log Out</string>
+    <string name="lbl_theme">Theme</string>
+
+    <!--  Preference Keys  -->
+    <string name="key_theme">key_theme</string>
+    <string name="key_logout">key_logout</string>
+
+    <!--  Preference Summaries  -->
+    <string name="lbl_select_theme">Select theme</string>
+
+    <!--  Pin Titles  -->
+    <string name="lbl_pin_announcement">Announcement</string>
+    <string name="lbl_pin_warning">Warning</string>
+
+    <!--  Misc  -->
+    <string name="lbl_confirm">Are you sure?</string>
+    <string name="lbl_yes">Yes</string>
+    <string name="lbl_cancel">Cancel</string>
+
+    <!--  Theme Titles  -->
+    <string-array name="theme_option_titles">
+        <item>System Theme</item>
+        <item>Battery Saver</item>
+        <item>Light</item>
+        <item>Dark</item>
+    </string-array>
+
+    <!--  Theme Values  -->
+    <string-array name="theme_option_values">
+        <item>-1</item>
+        <item>3</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+    <!--  Username Colors  -->
+    <string-array name="username_colors">
+        <item>#F01818</item>
+        <item>#10A010</item>
+        <item>#2424E0</item>
+        <item>#F0B000</item>
+        <item>#0090C0</item>
+        <item>#F010B0</item>
+        <item>#E07000</item>
+        <item>#A000E0</item>
+    </string-array>
+
+
+    <!--  Debug  -->
+    <string name="debug_text_body">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
+        ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
+        laboris nisi ut aliquip ex ea commodo consequat.
+    </string>
+    <string name="debug_topic">Politics</string>
+    <string name="debug_username">John Smith</string>
+    <string name="debug_emoji">😂😂😂</string>
+    <string name="debug_pin">Announcement</string>
+
+</resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#009CFF</color>
+    <color name="colorPrimaryDark">@color/colorPrimary</color>
+    <color name="colorStatusBar">#F2121212</color>
+    <color name="colorOnSurface">#606060</color>
+    <color name="colorMessage">#383838</color>
+    <color name="colorMessageSelf">@color/colorPrimary</color>
+    <color name="colorPrimaryText">#FFFFFF</color>
+    <color name="colorBarShadowTop">#1F000000</color>
+    <color name="colorBarShadowBottom">#0D000000</color>
+    <color name="colorAnnouncement">#B03030</color>
+    <color name="colorWarning">#F09038</color>
+</resources>

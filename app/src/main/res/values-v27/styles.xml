@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme" parent="Base.AppTheme">
+        <!--  Light Theme for >= API 27  -->
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:navigationBarColor">@color/colorStatusBar</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+</resources>

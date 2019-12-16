@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "73618911774",
+    "firebase_url": "https://tallr-8bdd7.firebaseio.com",
+    "project_id": "tallr-8bdd7",
+    "storage_bucket": "tallr-8bdd7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:73618911774:android:f029d10e24c6db3ea5f40f",
+        "android_client_info": {
+          "package_name": "com.elmpool.tallr"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "73618911774-af5po4ku8qcd3re23onp3508lgd04t20.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.elmpool.tallr",
+            "certificate_hash": "957cf3833ce0ee9fb14d91e689727c84513053d4"
+          }
+        },
+        {
+          "client_id": "73618911774-c1m1jcc2li0pr7md4n9eph5s37p4j1vm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDQ0n0pdYZFgW4GLJrnn_ETJaOjfW3E7lc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "73618911774-c1m1jcc2li0pr7md4n9eph5s37p4j1vm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

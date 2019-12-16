@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/menu_settings"
+        android:title="@string/lbl_settings"
+        android:icon="@drawable/ic_settings"/>
+    <item android:id="@+id/menu_pins"
+        android:title="@string/lbl_show_pins"
+        android:icon="@drawable/ic_pin_selected"/>
+    <item android:id="@+id/menu_about"
+        android:title="@string/lbl_about"
+        android:icon="@drawable/ic_settings"/>
+</menu>

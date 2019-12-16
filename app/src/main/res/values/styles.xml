@@ -1,0 +1,37 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="Base.AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!--  Both Themes, Any API  -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:statusBarColor">@color/colorStatusBar</item>
+        <item name="alertDialogTheme">@style/MaterialAlertDialog.Rounded</item>
+        <item name="android:fontFamily">@font/google_sans_regular</item>
+    </style>
+
+    <style name="AppTheme" parent="Base.AppTheme">
+        <!--  Light Theme for < API 27  -->
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <style name="MessageTextInputLayoutStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/colorSendBox</item>
+        <item name="hintTextColor">@color/colorSendBox</item>
+    </style>
+
+    <style name="AppTheme.Login" parent="AppTheme">
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="AppTheme.Settings" parent="AppTheme">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="MaterialAlertDialog.Rounded" parent="ThemeOverlay.MaterialComponents.Dialog.Alert">
+        <item name="android:dialogCornerRadius" tools:targetApi="P">8dp</item>
+        <item name="colorAccent">@color/colorPrimary</item>
+    </style>
+
+</resources>
