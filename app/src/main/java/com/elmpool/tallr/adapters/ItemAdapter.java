@@ -3,56 +3,57 @@ package com.elmpool.tallr.adapters;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.os.Handler;
+import android.text.Layout;
+import android.text.StaticLayout;
+import android.text.TextPaint;
+import android.transition.AutoTransition;
+import android.transition.TransitionManager;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.elmpool.tallr.R;
-import com.elmpool.tallr.services.Item;
-import com.elmpool.tallr.services.Manager;
-import com.elmpool.tallr.services.Message;
-import com.elmpool.tallr.services.Pin;
+import com.elmpool.tallr.models.Item;
+import com.elmpool.tallr.utils.Manager;
+import com.elmpool.tallr.models.Message;
+import com.elmpool.tallr.models.Pin;
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.material.card.MaterialCardView;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
+public class ItemAdapter extends FirebaseRecyclerAdapter<Item, ItemAdapter.ItemViewHolder> {
 
-public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder> {
-
-    private List<Item> items;
     private FirebaseUser user;
-    private LinearLayoutManager llm;
+    private RecyclerView recycler;
+    private Context context;
+    private boolean animate;
 
-    private int padding;
-    private int radius;
-
-    public ItemAdapter(Context context, List<Item> items) {
-        user = FirebaseAuth.getInstance().getCurrentUser();
-        padding = Manager.convertDimension(context, R.dimen.message_padding);
-        radius = Manager.convertDimension(context, R.dimen.message_radius);
-        this.items = items;
+    public ItemAdapter(@NonNull FirebaseRecyclerOptions options, @NotNull FirebaseUser user, Context context) {
+        super(options);
+        this.user = user;
+        this.context = context;
+        observe();
     }
 
     @NonNull
     @Override
     public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        if (viewType == Item.PIN)
-            return new PinViewHolder(createView(parent, R.layout.item_pin));
-        if (viewType == Item.MSG)
-            return new MessageViewHolder(createView(parent, R.layout.item_msg));
-        else if (viewType == Item.MSG_EMOJI)
-            return new MessageEmojiViewHolder(createView(parent, R.layout.item_msg_emoji));
-        else if (viewType == Item.TYPING)
-            return new TypingViewHolder(createView(parent, R.layout.item_typing));
-        return null;
+        switch (viewType) {
+            case Item.PIN: return new PinViewHolder(createView(parent, R.layout.item_pin));
+            case Item.MSG: return new MessageViewHolder(createView(parent, R.layout.item_msg));
+            case Item.MSG_EMOJI: return new MessageEmojiViewHolder(createView(parent, R.layout.item_msg_emoji));
+            default: throw new IllegalArgumentException();
+        }
     }
 
     private View createView(@NonNull ViewGroup parent, int layout){
@@ -60,192 +61,253 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final ItemViewHolder holder, int position) {
-        final Item item = items.get(position);
-        holder.bind(item, position);
-    }
-
-    @Override
     public int getItemViewType(int position) {
-        return  items.get(position).getType();
+        return getItem(position).getType();
     }
 
     @Override
-    public int getItemCount() {
-        return items.size();
+    protected void onBindViewHolder(@NonNull final ItemViewHolder holder, int position, @NonNull Item model) {
+        holder.bind(model, position);
     }
 
-    public abstract class ItemViewHolder extends RecyclerView.ViewHolder {
+    @Override
+    public void onDataChanged() {
+        super.onDataChanged();
+        for (int i=0; i < getItemCount(); i++){
+            Item item = getItem(i);
+            if (item.getType() == Item.MSG) {
+                Message message = (Message) item;
+                int max = scan(message, i, 1);
+                int min = scan(message, i, -1);
+                setWidths(message, min, max);
+                if (min==max) message.setFlags(Message.TYPE_SINGLE);
+                else if (i==max) message.setFlags(Message.TYPE_BOTTOM);
+                else if (i==min) message.setFlags(Message.TYPE_TOP);
+                else message.setFlags(Message.TYPE_CENTER);
+            }
+        }
+    }
 
+    private int scan(Message message, int position, int direction){
+        if (position >= 0 && position < getItemCount()) {
+            Item item = getItem(position);
+            if (item.getType() == Item.MSG) {
+                Message neighbour = (Message) item;
+                if (message.sameUser(neighbour) && message.syncTime(neighbour)) {
+                    return scan(neighbour,position + direction, direction);
+                }
+            }
+        }
+        return position - direction;
+    }
+
+    private void setWidths(Message message, int min, int max){
+        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+        int screen = (int)(displayMetrics.widthPixels*0.875);
+        int maxWidth = ViewGroup.LayoutParams.WRAP_CONTENT;
+        for (int i=min; i<=max; i++) {
+            Message other = (Message) getItem(i);
+            TextPaint paint = new TextPaint();
+            paint.setTextSize(Manager.convertDimension(context, R.dimen.message_text_size));
+            String text = other.getText();
+
+            StaticLayout layout = new StaticLayout(text, paint, screen,
+                    Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false);
+            int width = (int) layout.getLineMax(0);
+            if (width > maxWidth) maxWidth = width;
+        }
+
+        message.setViewWidth(maxWidth);
+
+        for (int i=min; i<=max; i++) {
+            Message other = (Message) getItem(i);
+            if (other.getViewWidth() < maxWidth) {
+                message.setViewWidth(maxWidth);
+            }
+        }
+    }
+
+    private void observe(){
+        registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+
+            @Override
+            public void onItemRangeInserted(int positionStart, int itemCount) {
+                super.onItemRangeInserted(positionStart, itemCount);
+                if (recycler != null) {
+                    int count = getItemCount();
+                    int last = ((LinearLayoutManager) recycler.getLayoutManager()).findLastCompletelyVisibleItemPosition();
+                    if (last == -1 || positionStart >= (count - 1) && last == (positionStart - 1)) {
+                        recycler.scrollToPosition(positionStart);
+
+                    }
+                }
+                if (positionStart == getItemCount()-1) {
+                    Item item = getItem(positionStart);
+                    if (item.getType() == Item.MSG) {
+                        Message message = (Message) getItem(positionStart);
+                        int min = scan(message, positionStart, -1);
+                        for (int i=min; i<positionStart; i++) {
+                            notifyItemChanged(i);
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    public abstract class ItemViewHolder extends RecyclerView.ViewHolder implements  View.OnClickListener{
+
+
+        TextView time;
+        MaterialCardView card;
 
         ItemViewHolder(@NonNull View itemView) {
             super(itemView);
+            time = itemView.findViewById(R.id.lbl_time);
+            card = itemView.findViewById(R.id.card_message);
+            itemView.setOnClickListener(this);
         }
 
         public abstract void bind(Item item, int position);
+
+        @Override
+        public void onClick(View view) {
+            showTime();
+        }
+
+        private void showTime(){
+            int position = getAdapterPosition();
+            if (animate && position != -1) {
+                Item item = getItem(position);
+                TextView time = this.time;
+                if (item.getType() == Item.MSG) {
+                    Message message = (Message) item;
+                    int min = scan(message, position, -1);
+                    View other = recycler.getLayoutManager().findViewByPosition(min);
+                    if (other == null) return;
+                    time = other.findViewById(R.id.lbl_time);
+                }
+                if ((boolean) time.getTag()) return;
+                TransitionManager.beginDelayedTransition(recycler, new AutoTransition());
+                int visible = time.getVisibility();
+                Handler handler = new Handler();
+                if (visible == View.GONE) {
+                    int delay = 3500;
+                    final TextView finalTime = time;
+                    finalTime.setVisibility(View.VISIBLE);
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (finalTime.getVisibility() == View.VISIBLE) {
+                                TransitionManager.beginDelayedTransition(recycler, new AutoTransition());
+                                finalTime.setVisibility(View.GONE);
+                            }
+                        }
+                    }, delay);
+                } else {
+                    time.setVisibility(View.GONE);
+                }
+            }
+        }
+
 
     }
 
     public class MessageViewHolder extends ItemViewHolder {
 
         TextView text, name;
-        MaterialCardView card;
-
+        Message message;
 
         MessageViewHolder(@NonNull View itemView) {
             super(itemView);
             text = itemView.findViewById(R.id.lbl_message);
             name = itemView.findViewById(R.id.lbl_name);
-            card = itemView.findViewById(R.id.card_message);
         }
 
         @Override
         public void bind(Item item, int position){
-            final Message message = (Message) item;
-            text.setText(message.getMessage());
-            text.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View view) {
-                    Toast.makeText(itemView.getContext(), message.getTime(), Toast.LENGTH_SHORT).show();
-                    return false;
-                }
-            });
+            this.message = (Message) item;
+            text.setText(message.getText());
 
             if (message.getUserID().equals(user.getUid()))  decorateSelf(message);
-            else decorateOther(message, position);
-
-            boolean prev = checkContinued(message, position, -1);
-            boolean after = checkContinued(message, position, 1);
-
-            if(prev) connectPrev();
-            else disconnectPrev();
-
-            if (after) connectAfter();
-            else disconnectAfter();
+            else decorateOther(message);
+            showTime(position);
+            format();
 
         }
 
-        private void changeWidths(Message message, int position, int direction){
-            if (position == 0) return;
-            boolean sameUser = true;
-            int modifier = 1;
-            while (sameUser) {
-                int next = position - (modifier * direction);
-                if (next >= 0 && next < items.size()) {
-                    Item itemAdj = items.get(next);
-                    if (itemAdj.getType() == Item.MSG) {
-                        Message msgAdj = (Message) itemAdj;
-                        if (msgAdj.getUserID().equals(message.getUserID())) {
-                            modifier ++;
-                            continue;
-                        }
-                    }
-                }
-                sameUser = false;
-            }
-            if (modifier == 1) return;
-            List<View> views = new ArrayList<>();
-            int max = 0;
-            for (int i = 0; i <= modifier; i++) {
-                View view = llm.findViewByPosition(position - (i * direction));
-                if (view != null) {
-                    int width = view.findViewById(R.id.card_message).getWidth();
-                    views.add(view.findViewById(R.id.card_message));
-                    if (width > max) {
-                        max = width;
-                    }
+        private void showTime(int position){
+            boolean sync = position != 0;
+            if (sync && message.getFlags() == Message.TYPE_TOP
+                    || message.getFlags() == Message.TYPE_SINGLE) {
+                if (position-1 != -1) {
+                    Item other = getItem(position - 1);
+                    sync = message.syncTime(other, 30 * 60);
                 }
             }
-            for (View view : views) {
-                view.getLayoutParams().width = max;
+            time.setVisibility(sync ? View.GONE : View.VISIBLE);
+            time.setTag(!sync);
+            time.setText(message.getTime());
+            int padding = sync ?
+                    Manager.convertDimension(context, R.dimen.time_padding_collapsed) :
+                    Manager.convertDimension(context, R.dimen.time_padding);
+            time.setPadding(
+                    time.getPaddingLeft(),
+                    padding,
+                    time.getPaddingRight(),
+                    time.getPaddingBottom());
+        }
+
+        private void format() {
+            int padding = Manager.convertDimension(context, R.dimen.message_padding);
+            int radius = Manager.convertDimension(context, R.dimen.message_corner_radius);
+            switch (message.getFlags()) {
+                case Message.TYPE_TOP: shape(radius, 0, padding, 0, View.VISIBLE); break;
+                case Message.TYPE_CENTER: shape(0, 0, 0, 0, View.GONE); break;
+                case Message.TYPE_BOTTOM: shape(0, radius, 0, padding, View.GONE); break;
+                default: shape(radius, radius, padding, padding, View.VISIBLE); break;
             }
         }
 
-        private boolean checkContinued(Message message, int position, int adj){
-            int indexAdj = position + adj;
-            if (indexAdj >= 0 && indexAdj < items.size()) {
-                Item itemAdj = items.get(indexAdj);
-                if (itemAdj.getType() == Item.MSG) {
-                    Message msgAdj = (Message) itemAdj;
-                    return msgAdj.getUserID().equals(message.getUserID());
-                }
-            }
-            return false;
+        private void shape(int radiusTop, int radiusBottom, int paddingTop, int paddingBottom, int visibility) {
+            name.setVisibility(visibility);
+            card.setShapeAppearanceModel(card.getShapeAppearanceModel()
+                    .toBuilder()
+                    .setTopLeftCornerSize(radiusTop)
+                    .setTopRightCornerSize(radiusTop)
+                    .setBottomLeftCornerSize(radiusBottom)
+                    .setBottomRightCornerSize(radiusBottom)
+                    .build());
+            itemView.setPadding(
+                    itemView.getPaddingLeft(),
+                    paddingTop,
+                    itemView.getPaddingRight(),
+                    paddingBottom);
+            int width = message.getViewWidth();
+            ViewGroup.LayoutParams params = text.getLayoutParams();
+            params.width = width;
+            text.setLayoutParams(params);
         }
 
-        private void decorateSelf(Message message){
+        protected void decorateSelf(Message message){
             Context context = card.getContext();
-            card.setCardBackgroundColor(context.getColor(R.color.colorMessageSelf));
-            text.setTextColor(context.getColor(R.color.white));
-            name.setTextColor(context.getColor(R.color.colorPrimaryText));
-            name.setTypeface(null, Typeface.BOLD);
+            card.setCardBackgroundColor(Manager.getColor(context, R.color.colorMessageSelf));
+            text.setTextColor(Manager.getColor(context, R.color.white));
+            name.setTextColor(Manager.getColor(context, R.color.colorPrimaryText));
+            name.setTypeface(ResourcesCompat.getFont(context, R.font.google_sans_bold));
             name.setText(message.getUsername());
         }
 
-        protected void decorateOther(Message message, int position){
+        protected void decorateOther(Message message){
             Context context = card.getContext();
-            card.setCardBackgroundColor(context.getColor(R.color.colorMessage));
-            text.setTextColor(context.getColor(R.color.colorPrimaryText));
-            name.setTypeface(null, Typeface.NORMAL);
+            card.setCardBackgroundColor(Manager.getColor(context, R.color.colorMessage));
+            text.setTextColor(Manager.getColor(context, R.color.colorPrimaryText));
+            name.setTypeface(ResourcesCompat.getFont(context, R.font.google_sans_regular));
             name.setVisibility(View.VISIBLE);
 
             int color = getColors(itemView.getContext(), message.getUserID());
             name.setText(message.getUsername());
             name.setTextColor(color);
-        }
-
-        private void connectPrev(){
-            itemView.setPadding(
-                    itemView.getPaddingLeft(),
-                    0,
-                    itemView.getPaddingRight(),
-                    itemView.getPaddingBottom());
-            name.setVisibility(View.GONE);
-            card.setShapeAppearanceModel(card.getShapeAppearanceModel()
-                    .toBuilder()
-                    .setTopLeftCornerSize(0)
-                    .setTopRightCornerSize(0)
-                    .build());
-        }
-
-        private void disconnectPrev(){
-            itemView.setPadding(
-                    itemView.getPaddingLeft(),
-                    padding,
-                    itemView.getPaddingRight(),
-                    itemView.getPaddingBottom());
-            name.setVisibility(View.VISIBLE);
-            card.setShapeAppearanceModel(card.getShapeAppearanceModel()
-                    .toBuilder()
-                    .setTopLeftCornerSize(radius)
-                    .setTopRightCornerSize(radius)
-                    .build());
-        }
-
-        private void connectAfter() {
-            itemView.setPadding(
-                    itemView.getPaddingLeft(),
-                    itemView.getPaddingTop(),
-                    itemView.getPaddingRight(),
-                    0);
-            card.setShapeAppearanceModel(card.getShapeAppearanceModel()
-                    .toBuilder()
-                    .setBottomLeftCornerSize(0)
-                    .setBottomRightCornerSize(0)
-                    .build());
-        }
-
-        private void disconnectAfter(){
-            itemView.setPadding(
-                    itemView.getPaddingLeft(),
-                    itemView.getPaddingTop(),
-                    itemView.getPaddingRight(),
-                    padding);
-            card.setShapeAppearanceModel(card.getShapeAppearanceModel()
-                    .toBuilder()
-                    .setBottomLeftCornerSize(radius)
-                    .setBottomRightCornerSize(radius)
-                    .build());
         }
 
         private int getColors(Context context, String userID){
@@ -265,24 +327,21 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
         }
 
         @Override
-        protected void decorateOther(Message message, int position) {
-            super.decorateOther(message, position);
-            Context context = card.getContext();
-            card.setCardBackgroundColor(context.getColor(android.R.color.transparent));
+        public void bind(Item item, int position) {
+            super.bind(item, position);
+            card.setCardBackgroundColor(Manager.getColor(context, android.R.color.transparent));
         }
+
     }
 
     public class PinViewHolder extends ItemViewHolder {
 
-        TextView title, text, time;
-        MaterialCardView card;
+        TextView title, text;
 
         PinViewHolder(@NonNull View itemView) {
             super(itemView);
             title = itemView.findViewById(R.id.lbl_title);
             text = itemView.findViewById(R.id.lbl_message);
-            time = itemView.findViewById(R.id.lbl_time);
-            card = itemView.findViewById(R.id.card_message);
         }
 
         @Override
@@ -292,27 +351,26 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
             text.setText(pin.getMessage());
             time.setText(pin.getTime());
             card.setCardBackgroundColor(pin.getColor(itemView.getContext()));
+            time.setTag(true);
         }
 
     }
-
-    public class TypingViewHolder extends ItemViewHolder {
-
-        TypingViewHolder(@NonNull View itemView) {
-            super(itemView);
-        }
-
-        @Override
-        public void bind(Item item, int position) {
-
-        }
-
-    }
-
 
     @Override
     public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
-        this.llm = (LinearLayoutManager) recyclerView.getLayoutManager();
+        this.recycler = recyclerView;
+    }
+
+    @Override
+    public void stopListening() {
+        super.stopListening();
+        this.animate = false;
+    }
+
+    @Override
+    public void startListening() {
+        super.startListening();
+        this.animate = true;
     }
 }

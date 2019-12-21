@@ -40,7 +40,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
 
-    <com.elmpool.tallr.widgets.BounceScrollView
+    <com.elmpool.tallr.widgets.bounce.BounceScrollView
         android:id="@+id/scroll_login"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -49,7 +49,10 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.5">
+        app:layout_constraintVertical_bias="0.5"
+        app:ratioForwards="@dimen/scroll_ratio_forwards"
+        app:ratioBackwards="@dimen/scroll_ratio_backwards"
+        app:decelFactor="@dimen/scroll_decel_factor">
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_info"
@@ -176,6 +179,6 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-    </com.elmpool.tallr.widgets.BounceScrollView>
+    </com.elmpool.tallr.widgets.bounce.BounceScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

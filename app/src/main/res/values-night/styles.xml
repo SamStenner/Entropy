@@ -2,14 +2,7 @@
 <resources>
 
     <style name="AppTheme" parent="Base.AppTheme">
-        <!--  Dark Theme for Any API  -->
-        <item name="android:navigationBarColor">@color/colorStatusBar</item>
-        <item name="android:windowLightStatusBar">false</item>
-    </style>
-
-    <style name="MessageTextInputLayoutStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-        <item name="boxStrokeColor">@color/colorSendBox</item>
-        <item name="hintTextColor">@color/colorSendBox</item>
+        <!--  Dark Theme, Any API  -->
     </style>
 
 </resources>

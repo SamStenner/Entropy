@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
 import com.elmpool.tallr.R;
-import com.elmpool.tallr.services.Manager;
+import com.elmpool.tallr.utils.Manager;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -47,12 +47,6 @@ public class LoginActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         handleButtons();
         getDelegate().setLocalNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-    }
-
-    private void animate(boolean show) {
-        int view = show ? View.VISIBLE : View.GONE;
-        btnApple.setVisibility(view);
-        btnMicrosoft.setVisibility(view);
     }
 
     private void handleButtons(){

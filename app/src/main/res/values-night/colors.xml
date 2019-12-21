@@ -2,13 +2,21 @@
 <resources>
     <color name="colorPrimary">#009CFF</color>
     <color name="colorPrimaryDark">@color/colorPrimary</color>
-    <color name="colorStatusBar">#F2121212</color>
-    <color name="colorOnSurface">#606060</color>
+    <color name="colorStatusBar">#EB121212</color>
+    <color name="colorOnSurface">#181818</color>
     <color name="colorMessage">#383838</color>
     <color name="colorMessageSelf">@color/colorPrimary</color>
     <color name="colorPrimaryText">#FFFFFF</color>
+    <color name="colorMax">#000</color>
     <color name="colorBarShadowTop">#1F000000</color>
     <color name="colorBarShadowBottom">#0D000000</color>
     <color name="colorAnnouncement">#B03030</color>
     <color name="colorWarning">#F09038</color>
+
+    <color name="colorWebsite">#22DBA0</color>
+    <color name="colorEmail">#C73D3D</color>
+    <color name="colorLinkedIn">#226EE0</color>
+    <color name="colorTwitter">#00aced</color>
+    <color name="colorGithub">#EE6721</color>
+
 </resources>

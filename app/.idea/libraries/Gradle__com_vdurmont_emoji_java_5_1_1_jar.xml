@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Gradle: com.vdurmont:emoji-java:5.1.1@jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.vdurmont/emoji-java/5.1.1/5b5896190e12110584f1e9e09eff376565a92626/emoji-java-5.1.1.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.vdurmont/emoji-java/5.1.1/e4005c482d043b0d8356cee902de902e3da4202b/emoji-java-5.1.1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.vdurmont/emoji-java/5.1.1/360a5e92b36363cc47f8bfbd87429cf79a1fead9/emoji-java-5.1.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

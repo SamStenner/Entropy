@@ -3,25 +3,31 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:focusableInTouchMode="true"
     tools:context=".activities.MainActivity">
 
-    <com.elmpool.tallr.widgets.BounceRecyclerView
+    <com.elmpool.tallr.widgets.bounce.BounceRecyclerView
         android:id="@+id/recycler_messages"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:clipToPadding="false"
         android:layoutAnimation="@anim/layout_animation"
-        android:paddingTop="112dp"
-        android:paddingBottom="84dp"
+        android:paddingTop="@dimen/toolbar_padding"
+        android:paddingBottom="@dimen/send_padding"
         android:scrollbars="vertical"
+        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="@+id/layout_send"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:reverseLayout="true"
-        app:stackFromEnd="true" />
+        app:stackFromEnd="true"
+        app:ratioForwards="@dimen/scroll_ratio_forwards"
+        app:ratioBackwards="@dimen/scroll_ratio_backwards"
+        app:decelFactor="@dimen/scroll_decel_factor"/>
 
     <FrameLayout
         android:fitsSystemWindows="true"
@@ -34,133 +40,195 @@
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar_main"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:menu="@menu/main"
-            android:background="@color/colorStatusBar">
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/colorStatusBar"
+            app:menu="@menu/main">
 
         </com.google.android.material.appbar.MaterialToolbar>
 
         <LinearLayout
-            android:id="@+id/layout_title"
             android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
-            android:gravity="center_horizontal"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <TextView
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_title"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/lbl_topic"
-                android:textAlignment="center"
-                android:textSize="12sp" />
+                android:layout_height="?attr/actionBarSize"
+                android:paddingTop="2dp">
 
-            <TextView
-                android:id="@+id/lbl_title"
+                <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/guideline_start"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_percent="0.25" />
+
+                <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/guideline_end"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_percent="0.75" />
+
+                <TextView
+                    android:id="@+id/lbl_topic"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/lbl_topic"
+                    android:textAlignment="center"
+                    android:textSize="12sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextSwitcher
+                    android:id="@+id/switcher_title"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginTop="3dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/guideline_end"
+                    app:layout_constraintStart_toStartOf="@+id/guideline_start"
+                    app:layout_constraintTop_toBottomOf="@+id/lbl_topic">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center_horizontal"
+                        android:autoSizeMaxTextSize="24sp"
+                        android:autoSizeMinTextSize="16sp"
+                        android:autoSizeTextType="uniform"
+                        android:fontFamily="@font/google_sans_bold"
+                        android:maxLines="1"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorPrimaryText"
+                        android:textSize="24sp"
+                        tools:targetApi="o"
+                        tools:text="@string/debug_topic" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center_horizontal"
+                        android:autoSizeMaxTextSize="24sp"
+                        android:autoSizeMinTextSize="16sp"
+                        android:autoSizeTextType="uniform"
+                        android:fontFamily="@font/google_sans_bold"
+                        android:maxLines="1"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorPrimaryText"
+                        android:textSize="24sp"
+                        tools:targetApi="o"
+                        tools:text="@string/debug_topic" />
+
+                </TextSwitcher>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <View
+                android:id="@+id/shadow_top"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="@string/debug_topic"
-                android:textAlignment="center"
-                android:textColor="@color/colorPrimaryText"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                tools:text="@string/debug_topic" />
+                android:layout_height="4dp"
+                android:alpha="1"
+                android:background="@drawable/toolbar_shadow"
+                android:stateListAnimator="@animator/toolbar_shadow" />
 
         </LinearLayout>
 
-        <View
-            android:id="@+id/shadow_top"
-            android:layout_width="match_parent"
-            android:layout_height="3dp"
-            android:layout_marginTop="?actionBarSize"
-            android:background="@drawable/toolbar_shadow"
-            android:stateListAnimator="@animator/toolbar_shadow"
-            android:alpha="1" />
-
     </FrameLayout>
 
-    <FrameLayout
+    <LinearLayout
         android:id="@+id/layout_send"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <View
-            android:id="@+id/shadow_bottom"
+        <TextView
+            android:id="@+id/indicator_typing"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="0dp"
+            android:layout_weight="2"
+            android:padding="0dp"
+            android:text="......."
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="3dp"
-            android:background="@drawable/bar_shadow"
-            android:stateListAnimator="@animator/toolbar_shadow"
-            android:alpha="1" />
+            android:layout_height="wrap_content">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/colorStatusBar"
-            android:layout_marginTop="3dp"
-            android:paddingTop="4dp"
-            android:paddingBottom="6dp"
-            android:orientation="horizontal">
+            <View
+                android:id="@+id/shadow_bottom"
+                android:layout_width="match_parent"
+                android:layout_height="3dp"
+                android:background="@drawable/bar_shadow"
+                android:stateListAnimator="@animator/toolbar_shadow"
+                android:alpha="1" />
 
-            <ImageButton
-                android:id="@+id/btn_image"
-                style="@android:style/Widget.Material.ActionButton"
-                android:layout_width="wrap_content"
-                android:layout_height="48dp"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="2dp"
-                android:padding="8dp"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_image"
-                android:tint="@color/colorPrimary" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/txt_inp_message"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
-                app:boxCornerRadiusBottomEnd="30dp"
-                app:boxCornerRadiusBottomStart="30dp"
-                app:boxCornerRadiusTopEnd="30dp"
-                app:boxCornerRadiusTopStart="30dp"
-                app:endIconDrawable="@drawable/ic_send"
-                app:endIconMode="custom"
-                android:background="@drawable/shape_msg_box"
-                app:endIconTint="@color/colorPrimary">
+                android:background="@color/colorStatusBar"
+                android:layout_marginTop="3dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="6dp"
+                android:orientation="horizontal">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/txt_message"
-                    android:layout_width="match_parent"
+                <ImageButton
+                    android:id="@+id/btn_image"
+                    style="@android:style/Widget.Material.ActionButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="2dp"
+                    android:padding="8dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_image"
+                    android:tint="@color/colorPrimary" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/txt_inp_message"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:hint="@string/lbl_message"
-                    android:fontFamily="sans-serif"
-                    android:maxLines="3"
-                    android:minLines="1"
-                    android:inputType="textMultiLine|textCapSentences">
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    app:boxCornerRadiusBottomEnd="30dp"
+                    app:boxCornerRadiusBottomStart="30dp"
+                    app:boxCornerRadiusTopEnd="30dp"
+                    app:boxCornerRadiusTopStart="30dp"
+                    app:endIconDrawable="@drawable/ic_send"
+                    app:endIconMode="custom"
+                    android:background="@drawable/shape_msg_box"
+                    app:endIconTint="@color/colorPrimary">
 
-                </com.google.android.material.textfield.TextInputEditText>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/txt_message"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif"
+                        android:hint="@string/lbl_message"
+                        android:inputType="textMultiLine|textCapSentences"
+                        android:maxLines="3"
+                        android:minLines="1"
+                        android:textColorHighlight="@color/colorTextHighlight">
 
-            </com.google.android.material.textfield.TextInputLayout>
+                    </com.google.android.material.textfield.TextInputEditText>
 
-        </LinearLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
-    </FrameLayout>
+            </LinearLayout>
 
-    <ProgressBar
-        android:id="@+id/pb_messages"
-        style="?android:attr/progressBarStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:indeterminateTint="@color/colorPrimary"
-        app:layout_constraintBottom_toTopOf="@+id/layout_send"
-        app:layout_constraintEnd_toEndOf="@+id/recycler_messages"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        </FrameLayout>
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

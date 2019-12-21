@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="BounceView">
+        <attr name="ratioForwards" format="float" />
+        <attr name="ratioBackwards" format="float" />
+        <attr name="decelFactor" format="float" />
+    </declare-styleable>
+
+    <declare-styleable name="BounceRecyclerView">
+        <attr name="ratioForwards" />
+        <attr name="ratioBackwards" />
+        <attr name="decelFactor" />
+    </declare-styleable>
+
+    <declare-styleable name="BounceScrollView">
+        <attr name="ratioForwards" />
+        <attr name="ratioBackwards" />
+        <attr name="decelFactor" />
+    </declare-styleable>
+
+    <declare-styleable name="BounceHorizontalScrollView">
+        <attr name="ratioForwards" />
+        <attr name="ratioBackwards" />
+        <attr name="decelFactor" />
+    </declare-styleable>
+
+</resources>

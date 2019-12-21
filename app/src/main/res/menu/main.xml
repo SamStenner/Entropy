@@ -5,7 +5,7 @@
         android:icon="@drawable/ic_settings"/>
     <item android:id="@+id/menu_pins"
         android:title="@string/lbl_show_pins"
-        android:icon="@drawable/ic_pin_selected"/>
+        android:icon="@drawable/ic_pin_unselected"/>
     <item android:id="@+id/menu_about"
         android:title="@string/lbl_about"
         android:icon="@drawable/ic_settings"/>

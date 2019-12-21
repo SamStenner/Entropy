@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:overScrollMode="never">
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <ListPreference
+    <com.elmpool.tallr.widgets.MaterialListPreference
         android:key="@string/key_theme"
         android:title="@string/lbl_theme"
-        android:defaultValue="-1"
+        android:defaultValue="@string/theme_default"
         android:entries="@array/theme_option_titles"
         android:entryValues="@array/theme_option_values"
         android:summary="@string/lbl_select_theme" />

@@ -8,7 +8,6 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,11 +19,10 @@ import android.view.animation.Animation;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
+import android.widget.TextSwitcher;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.preference.PreferenceManager;
@@ -33,44 +31,45 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.elmpool.tallr.R;
 import com.elmpool.tallr.adapters.ItemAdapter;
-import com.elmpool.tallr.services.Item;
-import com.elmpool.tallr.services.Manager;
-import com.elmpool.tallr.services.Message;
-import com.elmpool.tallr.services.Pin;
-import com.elmpool.tallr.services.TypeIndicator;
-import com.elmpool.tallr.widgets.BounceRecyclerView;
+import com.elmpool.tallr.models.Item;
+import com.elmpool.tallr.utils.DataParser;
+import com.elmpool.tallr.utils.Manager;
+import com.elmpool.tallr.utils.TypeIndicator;
+import com.elmpool.tallr.widgets.bounce.BounceAdapter;
+import com.elmpool.tallr.widgets.bounce.BounceListener;
+import com.elmpool.tallr.widgets.bounce.BounceRecyclerView;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.database.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+
+import me.everything.android.ui.overscroll.IOverScrollDecor;
 
 public class MainActivity extends AppCompatActivity {
 
+    private View rootView;
     private MaterialToolbar toolbar;
-    private LinearLayout layoutTitle;
-    private View shaddowTop;
-    private View shaddowBottom;
-    private TextView lblTitle;
+    private LinearLayout layout_send;
+    private View shadowTop;
+    private View shadowBottom;
+    private TextView chipTyping;
+    private TextSwitcher switcher;
     private TextInputLayout txtInpMessage;
     private TextInputEditText txtMessage;
     private ImageView btnImage;
-    private ProgressBar pbMessages;
     private BounceRecyclerView recyclerMessages;
 
     private Menu menu;
@@ -79,17 +78,12 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseUser user;
     private FirebaseDatabase database;
     private DatabaseReference refMessages;
-    private DatabaseReference refPins;
     private DatabaseReference refTyping;
+    private DatabaseReference refSubject;
 
-    private ChildEventListener messagesListener;
-    private ChildEventListener pinsListener;
-    private ValueEventListener typingListener;
-
-    private List<Item> items = new ArrayList<>();
-    private List<Item> pins = new ArrayList<>();
     private ItemAdapter itemAdapter;
     private boolean pinsOnly;
+    private TypeIndicator typeIndicator;
 
 
     @Override
@@ -97,14 +91,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setupTheme();
         setContentView(R.layout.activity_main);
-        Manager.setStatusBar(this);
         setSession();
         setupViews();
+        Manager.setStatusBar(this);
+        Manager.setNavBar(rootView, layout_send, recyclerMessages);
     }
 
     private void setupTheme(){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        int value = Integer.valueOf(prefs.getString("key_theme", "-1"));
+        int value = Integer.valueOf(prefs.getString(getString(R.string.key_theme), getString(R.string.theme_default)));
         AppCompatDelegate.setDefaultNightMode(value);
     }
 
@@ -116,9 +111,8 @@ public class MainActivity extends AppCompatActivity {
         }
         database = FirebaseDatabase.getInstance();
         refMessages = database.getReference("messages");
-        refPins = database.getReference("pins");
         refTyping= database.getReference("meta/typing");
-
+        refSubject = database.getReference("meta/subject");
     }
 
     private void showLogin() {
@@ -127,22 +121,68 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupViews(){
+
+        rootView = findViewById(R.id.layout_root);
         toolbar = findViewById(R.id.toolbar_main);
-        layoutTitle = findViewById(R.id.layout_title);
-        shaddowTop = findViewById(R.id.shadow_top);
-        shaddowBottom = findViewById(R.id.layout_send);
-        lblTitle = findViewById(R.id.lbl_title);
+        layout_send = findViewById(R.id.layout_send);
+        shadowTop = findViewById(R.id.shadow_top);
+        shadowBottom = findViewById(R.id.shadow_bottom);
+        switcher = findViewById(R.id.switcher_title);
+        chipTyping = findViewById(R.id.indicator_typing);
         txtInpMessage = findViewById(R.id.txt_inp_message);
         txtMessage = findViewById(R.id.txt_message);
         btnImage = findViewById(R.id.btn_image);
-        pbMessages = findViewById(R.id.pb_messages);
         recyclerMessages = findViewById(R.id.recycler_messages);
         setupTextInput();
         setupRecycler();
         setupToolbar();
+        setupMeta();
+
+    }
+
+    private void setupMeta() {
+        refTyping.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                typeIndicator = dataSnapshot.getValue(TypeIndicator.class);
+                if(typeIndicator.isTyping() && !typeIndicator.getUserID().equals(user.getUid())) {
+                    chipTyping.setVisibility(View.VISIBLE);
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (!typeIndicator.isTyping()) {
+                               chipTyping.setVisibility(View.GONE);
+                            }
+                        }
+                    }, TypeIndicator.VISUAL_THRESHOLD);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        switcher.setInAnimation(this, R.anim.slide_down_in);
+        switcher.setOutAnimation(this, R.anim.slide_down_out);
+
+        refSubject.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                String subject = dataSnapshot.getValue(String.class);
+                switcher.setText(subject);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void setupToolbar() {
+
         int duration = 10000;
         float minAlpha = 0.3f;
         float maxAlpha = 1.0f;
@@ -153,9 +193,11 @@ public class MainActivity extends AppCompatActivity {
         animAlpha.setInterpolator(new AccelerateInterpolator(interpFactor));
         animAlpha.setRepeatMode(Animation.REVERSE);
         animAlpha.setRepeatCount(Animation.INFINITE);
-        lblTitle.startAnimation(animAlpha);
+        switcher.startAnimation(animAlpha);
+
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
+
     }
 
     @Override
@@ -176,6 +218,7 @@ public class MainActivity extends AppCompatActivity {
                 togglePins();
                 return true;
             case R.id.menu_about:
+                startActivity(new Intent(MainActivity.this, AboutActivity.class));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -185,156 +228,58 @@ public class MainActivity extends AppCompatActivity {
     private void togglePins(){
         pinsOnly = !pinsOnly;
         menu.getItem(1).setShowAsAction(pinsOnly ? MenuItem.SHOW_AS_ACTION_IF_ROOM : MenuItem.SHOW_AS_ACTION_NEVER);
-        itemAdapter = new ItemAdapter(this, pinsOnly ? pins : items);
-        recyclerMessages.swapAdapter(itemAdapter, true);
+        itemAdapter.stopListening();
+        setItemAdapter(pinsOnly);
         itemAdapter.notifyDataSetChanged();
-        scrollToBottom();
+        itemAdapter.startListening();
+
     }
 
     private void setupRecycler() {
         LinearLayoutManager llm = new LinearLayoutManager(this);
         recyclerMessages.setLayoutManager(llm);
-        itemAdapter = new ItemAdapter(this, items);
-        setupListeners();
-        applyListeners();
+        setItemAdapter(false);
         recyclerMessages.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                shaddowTop.setSelected(recyclerView.canScrollVertically(-1));
-                shaddowBottom.setSelected(recyclerView.canScrollVertically(1));
+                shadowTop.setSelected(recyclerView.canScrollVertically(BounceAdapter.SCROLL_DIRECTION_START));
+                shadowBottom.setSelected(recyclerView.canScrollVertically(BounceAdapter.SCROLL_DIRECTION_END));
+            }
+        });
+        recyclerMessages.setBounceListener(new BounceListener() {
+            @Override
+            public void onOverScrollStateChange(IOverScrollDecor decor, int oldState, int newState) {
+            }
+
+            @Override
+            public void OnOverStart() {
+                shadowTop.setSelected(true);
+            }
+
+            @Override
+            public void OnOverEnd() {
+
+            }
+
+            @Override
+            public void onReturn() {
+                shadowTop.setSelected(recyclerMessages.canScrollVertically(BounceAdapter.SCROLL_DIRECTION_START));
             }
         });
     }
 
-    private void setupListeners(){
-        final int typeTime = 2000;
-        messagesListener = new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                Message message = dataSnapshot.getValue(Message.class);
-                message.setID(dataSnapshot.getKey());
-                addItem(message);
-                if (recyclerMessages.getAdapter() == null) {
-                    pbMessages.setVisibility(View.GONE);
-                    recyclerMessages.setAdapter(itemAdapter);
-                }
-            }
 
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                Message message = dataSnapshot.getValue(Message.class);
-                message.setID(dataSnapshot.getKey());
-                int index = findMessageIndex(message);
-                if (index != -1) {
-                    items.set(index, message);
-                    itemAdapter.notifyItemChanged(index);
-                }
-            }
 
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-                Message message = dataSnapshot.getValue(Message.class);
-                message.setID(dataSnapshot.getKey());
-                int index = findMessageIndex(message);
-                if (index != -1) {
-                    items.remove(index);
-                    itemAdapter.notifyItemRemoved(index);
-                }
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        };
-        pinsListener = new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                Pin pin = dataSnapshot.getValue(Pin.class);
-                addItem(pin);
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        };
-        typingListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                TypeIndicator indicator = dataSnapshot.getValue(TypeIndicator.class);
-                if(indicator.isTyping() && !indicator.getUserID().equals(user.getUid())) {
-                    if (items.get(items.size()-1).getType() == Item.TYPING) {
-                        items.set(items.size()-1, indicator);
-                    } else {
-                        items.add(indicator);
-                        itemAdapter.notifyDataSetChanged();
-                        scrollToBottom();
-                    }
-                    Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            int index = items.size() - 1;
-                            Item item = items.get(index);
-                            if (item.getType() == Item.TYPING
-                                    && System.currentTimeMillis() - item.getTimestamp() - typeTime > 0) {
-                                items.remove(index);
-                                itemAdapter.notifyItemRemoved(index);
-                            }
-                        }
-                    }, typeTime);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        };
-    }
-
-    private void applyListeners(){
-        items.clear();
-        refMessages.addChildEventListener(messagesListener);
-        refPins.addChildEventListener(pinsListener);
-        refTyping.addValueEventListener(typingListener);
-    }
-
-    private void addItem(Item item){
-        if (item.getType() == Item.PIN){
-            pins.add(item);
-        }
-        items.add(item);
-        Collections.sort(items, new Comparator<Item>() {
-            @Override
-            public int compare(Item item1, Item item2) {
-                return Long.compare(item1.getTimestamp(), item2.getTimestamp());
-            }
-        });
-        itemAdapter.notifyDataSetChanged();
-        scrollToBottom();
+    private void setItemAdapter(boolean pinsOnly){
+        Query query = pinsOnly ? refMessages.orderByChild("type").equalTo(Item.PIN) : refMessages;
+        query = query.limitToLast(getResources().getInteger(R.integer.max_messages));
+        FirebaseRecyclerOptions<Item> options =
+                new FirebaseRecyclerOptions.Builder<Item>()
+                        .setQuery(query, DataParser.itemSnapshotParser())
+                        .build();
+        itemAdapter = new ItemAdapter(options, user, this);
+        recyclerMessages.setAdapter(itemAdapter);
     }
 
     private void setupTextInput(){
@@ -377,6 +322,18 @@ public class MainActivity extends AppCompatActivity {
             public void afterTextChanged(Editable editable) {
             }
         });
+        txtMessage.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, final boolean focused) {
+                scrollToBottomDelayed();
+            }
+        });
+        txtMessage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                scrollToBottomDelayed();
+            }
+        });
         btnImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -385,11 +342,26 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void scrollToBottom(){
+        int position = itemAdapter.getItemCount()-1;
+        if (position >= 0) recyclerMessages.smoothScrollToPosition(position);
+    }
+
+    private void scrollToBottomDelayed(){
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                scrollToBottom();
+            }
+        }, 100);
+    }
+
     private void sendMessage(@NotNull String message){
-        message = message.trim();
+        message = curateMessage(message);
         if (!TextUtils.isEmpty(message)) {
-            Log.e("MESSAGE", message);
             Map<String, Object> data = new HashMap<>();
+            data.put("/type", Item.MSG);
             data.put("/message", message);
             data.put("/userID", user.getUid());
             data.put("/username", user.getDisplayName());
@@ -400,19 +372,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void scrollToBottom(){
-        if (recyclerMessages.getAdapter() != null) {
-            recyclerMessages.scrollToPosition(recyclerMessages.getAdapter().getItemCount());
-        }
-    }
-
-    private int findMessageIndex(Message message){
-        for (int index=0; index < items.size(); index++) {
-            if (items.get(index).equals(message)){
-                return index;
-            }
-        }
-        return -1;
+    private String curateMessage(String message){
+        message = message.trim();
+        message = message.replaceAll("(?m)^\\s*$[\n\r]{1,}", "");
+        return message;
     }
 
     @Override
@@ -423,4 +386,17 @@ public class MainActivity extends AppCompatActivity {
         }
         super.onBackPressed();
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        itemAdapter.startListening();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        itemAdapter.stopListening();
+    }
+
 }

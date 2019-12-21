@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="toolbar_padding">84dp</dimen>
+    <dimen name="send_padding">90dp</dimen>
+    <dimen name="time_padding">28dp</dimen>
+    <dimen name="time_padding_collapsed">8dp</dimen>
     <dimen name="message_padding">6dp</dimen>
-    <dimen name="message_radius">24dp</dimen>
+    <dimen name="message_corner_radius">24dp</dimen>
+    <dimen name="message_text_size">16sp</dimen>
+    <dimen name="dialog_corner_radius">12dp</dimen>
+
+    <dimen name="scroll_ratio_forwards" type="dimen" format="float">7.0</dimen>
+    <dimen name="scroll_ratio_backwards" type="dimen" format="float">1.0</dimen>
+    <dimen name="scroll_decel_factor" type="dimen" format="float">-3.0</dimen>
 </resources>

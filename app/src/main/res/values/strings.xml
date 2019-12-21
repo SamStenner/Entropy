@@ -1,7 +1,7 @@
 <resources>
 
     <!--  Meta  -->
-    <string name="app_name">Sym</string>
+    <string name="app_name">Entropy</string>
 
     <!--  Login -->
     <string name="lbl_sign_in">Sign In</string>
@@ -42,13 +42,19 @@
     <string name="lbl_yes">Yes</string>
     <string name="lbl_cancel">Cancel</string>
 
+
     <!--  Theme Titles  -->
     <string-array name="theme_option_titles">
-        <item>System Theme</item>
-        <item>Battery Saver</item>
-        <item>Light</item>
-        <item>Dark</item>
+        <item>@string/theme_system</item>
+        <item>@string/theme_battery</item>
+        <item>@string/theme_light</item>
+        <item>@string/theme_dark</item>
     </string-array>
+
+    <string name="theme_system">System Theme</string>
+    <string name="theme_battery">Battery Saver</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
 
     <!--  Theme Values  -->
     <string-array name="theme_option_values">
@@ -57,6 +63,8 @@
         <item>1</item>
         <item>2</item>
     </string-array>
+
+    <string name="theme_default">3</string>
 
     <!--  Username Colors  -->
     <string-array name="username_colors">
@@ -70,6 +78,28 @@
         <item>#A000E0</item>
     </string-array>
 
+    <!--  Connect Links  -->
+    <string name="link_website">https://samstenner.com</string>
+    <string name="link_email">contact@samstenner.com</string>
+    <string name="link_linkedin">https://linkedin.com/in/samstenner</string>
+    <string name="link_twitter">https://twitter.com/SamOfStenner</string>
+    <string name="link_github">https://github.com/SamStenner</string>
+
+    <!--  Connect Titles  -->
+    <string name="lbl_website">Website</string>
+    <string name="lbl_email">Email</string>
+    <string name="lbl_linkedin">LinkedIn</string>
+    <string name="lbl_github">GitHub</string>
+
+    <!--  Email Misc  -->
+    <string name="mail_to">mailto:</string>
+    <string name="send_to">Send To…</string>
+
+    <!--  About  -->
+    <string name="lbl_dev_name">Sam Stenner</string>
+    <string name="lbl_dev_desc">Android Enthusiast</string>
+    <string name="lbl_credits">Credits</string>
+    <string name="lbl_ouch">Ouch!</string>
 
     <!--  Debug  -->
     <string name="debug_text_body">

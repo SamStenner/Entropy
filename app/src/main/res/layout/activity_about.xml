@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.AboutActivity">
+
+    <com.elmpool.tallr.widgets.bounce.BounceScrollView
+        android:id="@+id/scroll_about"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:ratioForwards="@dimen/scroll_ratio_forwards"
+        app:ratioBackwards="@dimen/scroll_ratio_backwards"
+        app:decelFactor="@dimen/scroll_decel_factor">
+
+        <LinearLayout
+            android:id="@+id/layout_interior"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="@dimen/toolbar_padding"
+            android:layout_marginStart="18dp"
+            android:layout_marginEnd="18dp"
+            android:orientation="vertical">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:layout_marginBottom="14dp"
+                app:cardBackgroundColor="@color/colorOnSurface"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="28dp"
+                    android:layout_marginBottom="20dp"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="64dp"
+                        android:layout_gravity="center_horizontal"
+                        app:srcCompat="@mipmap/ic_launcher_round" />
+
+                    <TextView
+                        android:id="@+id/lbl_app_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/app_name"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorPrimaryText"
+                        android:textSize="18sp"
+                        android:fontFamily="@font/google_sans_bold" />
+
+                    <TextView
+                        android:id="@+id/lbl_app_version"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="4dp"
+                        android:textAlignment="center"
+                        android:textSize="12sp"
+                        tools:text="v1.0.0" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:layout_marginBottom="14dp"
+                app:cardBackgroundColor="@color/colorOnSurface"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="28dp"
+                    android:layout_marginBottom="20dp"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/img_dev"
+                        android:layout_width="wrap_content"
+                        android:layout_height="64dp"
+                        android:layout_gravity="center_horizontal"
+                        app:srcCompat="@mipmap/sam" />
+
+                    <TextView
+                        android:id="@+id/lbl_dev_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/lbl_dev_name"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorPrimaryText"
+                        android:textSize="18sp"
+                        android:fontFamily="@font/google_sans_bold" />
+
+                    <TextView
+                        android:id="@+id/lbl_dev_desc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="4dp"
+                        android:text="@string/lbl_dev_desc"
+                        android:textAlignment="center"
+                        android:textSize="12sp" />
+
+                    <com.elmpool.tallr.widgets.bounce.BounceHorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="28dp"
+                        android:scrollbars="none"
+                        app:ratioForwards="@dimen/scroll_ratio_forwards"
+                        app:ratioBackwards="@dimen/scroll_ratio_backwards"
+                        app:decelFactor="@dimen/scroll_decel_factor">
+
+                        <com.google.android.material.chip.ChipGroup
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:paddingStart="16dp"
+                            android:paddingEnd="16dp">
+
+                            <com.google.android.material.chip.Chip
+                                android:id="@+id/chip_website"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="1dp"
+                                android:text="@string/lbl_website"
+                                app:chipBackgroundColor="@color/colorOnSurface"
+                                app:chipEndPadding="6dp"
+                                app:chipIcon="@drawable/ic_link"
+                                app:chipIconSize="22dp"
+                                app:chipIconTint="@color/colorWebsite"
+                                app:chipStartPadding="10dp"
+                                app:chipStrokeColor="@color/colorWebsite"
+                                app:chipStrokeWidth="2dp" />
+
+                            <com.google.android.material.chip.Chip
+                                android:id="@+id/chip_email"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="1dp"
+                                android:text="@string/lbl_email"
+                                app:chipBackgroundColor="@color/colorOnSurface"
+                                app:chipEndPadding="6dp"
+                                app:chipIcon="@drawable/ic_email"
+                                app:chipIconSize="18dp"
+                                app:chipIconTint="@color/colorEmail"
+                                app:chipStartPadding="12dp"
+                                app:chipStrokeColor="@color/colorEmail"
+                                app:chipStrokeWidth="2dp" />
+
+                            <com.google.android.material.chip.Chip
+                                android:id="@+id/chip_linkedin"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="1dp"
+                                android:text="@string/lbl_linkedin"
+                                app:chipBackgroundColor="@color/colorOnSurface"
+                                app:chipIcon="@drawable/ic_linkedin"
+                                app:chipIconSize="16dp"
+                                app:chipIconTint="@color/colorLinkedIn"
+                                app:chipStartPadding="12dp"
+                                app:chipStrokeColor="@color/colorLinkedIn"
+                                app:chipStrokeWidth="2dp" />
+
+                            <com.google.android.material.chip.Chip
+                                android:id="@+id/chip_twitter"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="1dp"
+                                android:text="@string/lbl_twitter"
+                                app:chipBackgroundColor="@color/colorOnSurface"
+                                app:chipEndPadding="6dp"
+                                app:chipIcon="@drawable/ic_twitter"
+                                app:chipIconSize="16dp"
+                                app:chipIconTint="@color/colorTwitter"
+                                app:chipStartPadding="12dp"
+                                app:chipStrokeColor="@color/colorTwitter"
+                                app:chipStrokeWidth="2dp" />
+
+                            <com.google.android.material.chip.Chip
+                                android:id="@+id/chip_github"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="1dp"
+                                android:text="@string/lbl_github"
+                                app:chipBackgroundColor="@color/colorOnSurface"
+                                app:chipEndPadding="6dp"
+                                app:chipIcon="@drawable/ic_github_logo"
+                                app:chipIconSize="16dp"
+                                app:chipIconTint="@color/colorGithub"
+                                app:chipStartPadding="12dp"
+                                app:chipStrokeColor="@color/colorGithub"
+                                app:chipStrokeWidth="2dp" />
+
+                        </com.google.android.material.chip.ChipGroup>
+
+                    </com.elmpool.tallr.widgets.bounce.BounceHorizontalScrollView>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:layout_marginBottom="14dp"
+                android:visibility="gone"
+                app:cardBackgroundColor="@color/colorOnSurface"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="28dp"
+                    android:layout_marginBottom="20dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:text="@string/lbl_credits"
+                        android:textColor="@color/colorPrimaryText"
+                        android:textSize="18sp"
+                        android:fontFamily="@font/google_sans_bold" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+
+        </LinearLayout>
+
+    </com.elmpool.tallr.widgets.bounce.BounceScrollView>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar_about"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorStatusBar"
+            app:menu="@menu/main"
+            app:title="@string/lbl_about">
+
+        </com.google.android.material.appbar.MaterialToolbar>
+
+        <View
+            android:id="@+id/shadow"
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:layout_marginTop="?actionBarSize"
+            android:alpha="1"
+            android:background="@drawable/toolbar_shadow"
+            android:stateListAnimator="@animator/toolbar_shadow" />
+
+    </FrameLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

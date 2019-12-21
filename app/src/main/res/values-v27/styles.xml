@@ -2,9 +2,15 @@
 <resources>
 
     <style name="AppTheme" parent="Base.AppTheme">
-        <!--  Light Theme for >= API 27  -->
-        <item name="android:windowLightStatusBar">true</item>
+        <!--  Light Theme, API >= API 27  -->
         <item name="android:navigationBarColor">@color/colorStatusBar</item>
+        <item name="android:statusBarColor">@color/colorStatusBar</item>
+        <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowLightNavigationBar">true</item>
     </style>
+
+    <style name="AppTheme.General" parent="AppTheme">
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+
 </resources>
